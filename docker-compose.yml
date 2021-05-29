@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  db1:
+    platform: linux/x86_64
+    image: mysql:5.7
+    volumes:
+      - ./mysql/db1.initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_DATABASE: mydb
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
+  
+  db2: 
+    platform: linux/x86_64
+    image: mysql:5.7
+    volumes:
+      - ./mysql/db2.initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_DATABASE: mydb
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3307:3306
+
+  
