@@ -31,40 +31,47 @@ func main() {
 		log.Fatal(err)
 	}
 
+	compare(fromInfo, toInfo, false)
+	compare(toInfo, fromInfo, true)
+
+	defer fromDb.Close()
+	defer toDb.Close()
+}
+
+func compare(fromInfo *database.DBStruct, toInfo *database.DBStruct, reversed bool) {
+	fromTxt := "比較元"
+	toTxt := "比較先"
+	if reversed {
+		fromTxt = "比較先"
+		toTxt = "比較元"
+	}
+
 	for tblName, t := range fromInfo.Tables {
 		if _, ok := toInfo.Tables[tblName]; !ok {
-			fmt.Printf("テーブル %s は比較先のDBに存在しません", tblName)
+			fmt.Printf("テーブル %s は%sのDBに存在しません", tblName, fromTxt)
 			continue
 		}
 
 		toClmn := *toInfo.Tables[tblName].Columns
 
 		for clmnName, fromColumn := range *t.Columns {
-			fmt.Println(clmnName)
 			if _, ok := toClmn[clmnName]; !ok {
-				fmt.Printf("フィールド %s は比較先のDBに存在しません", clmnName)
+				fmt.Printf("列名 %s は%sのDBに存在しません", clmnName, fromTxt)
 				continue
 			}
 
 			toColumn := toClmn[clmnName]
 			if fromColumn.Type != toColumn.Type {
-				fmt.Printf("フィールド %s の型定義が異なります。比較元=%v , 比較先=%v", clmnName, fromColumn.Type, toColumn.Type)
+				fmt.Printf("テーブル名: %s 列名 %s の型定義が異なります。%s=%v , %s=%v", tblName, clmnName, fromTxt, fromColumn.Type, toTxt, toColumn.Type)
 			}
 			if fromColumn.Length != toColumn.Length {
-				fmt.Printf("フィールド %s のLengthが異なります。比較元=%v , 比較先=%v", clmnName, fromColumn.Length, toColumn.Length)
+				fmt.Printf("テーブル名: %s 列名 %s のLengthが異なります。%s=%v , %s=%v", tblName, clmnName, fromTxt, fromColumn.Length, toTxt, toColumn.Length)
 			}
 			if fromColumn.IsNull != toColumn.IsNull {
-				fmt.Printf("フィールド %s のIsNull定義が異なります。比較元=%v , 比較先=%v", clmnName, fromColumn.IsNull, toColumn.IsNull)
+				fmt.Printf("テーブル名: %s 列名 %s のIsNull定義が異なります。%s=%v , %s=%v", tblName, clmnName, fromTxt, fromColumn.IsNull, toTxt, toColumn.IsNull)
 			}
 		}
 	}
-
-	defer fromDb.Close()
-	defer toDb.Close()
-}
-
-func compare(fromInfo *database.DBStruct, toInfo *database.DBStruct) error {
-
 }
 
 func makeInfo(acc *database.DbAccessor) (*database.DBStruct, error) {
