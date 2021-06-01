@@ -1,1 +1,1 @@
-create table mydb.user (id int, name varchar(10), job varchar(10));
+create table mydb.user (id int, name varchar(15) not null , job varchar(10) not null);
