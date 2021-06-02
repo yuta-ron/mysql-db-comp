@@ -48,7 +48,7 @@ func compare(fromInfo *database.DBStruct, toInfo *database.DBStruct, reversed bo
 
 	for tblName, t := range fromInfo.Tables {
 		if _, ok := toInfo.Tables[tblName]; !ok {
-			fmt.Printf("テーブル %s は%sのDBに存在しません", tblName, fromTxt)
+			fmt.Printf("テーブル %s は%sのDBに存在しません\n", tblName, fromTxt)
 			continue
 		}
 
@@ -56,19 +56,20 @@ func compare(fromInfo *database.DBStruct, toInfo *database.DBStruct, reversed bo
 
 		for clmnName, fromColumn := range *t.Columns {
 			if _, ok := toClmn[clmnName]; !ok {
-				fmt.Printf("列名 %s は%sのDBに存在しません", clmnName, fromTxt)
+				fmt.Printf("テーブル名: %s 列名 %s は%sのDBに存在しません\n", tblName, clmnName, fromTxt)
 				continue
 			}
 
 			toColumn := toClmn[clmnName]
+
 			if fromColumn.Type != toColumn.Type {
-				fmt.Printf("テーブル名: %s 列名 %s の型定義が異なります。%s=%v , %s=%v", tblName, clmnName, fromTxt, fromColumn.Type, toTxt, toColumn.Type)
+				fmt.Printf("テーブル名: %s 列名 %s の型定義が異なります。%s=%v , %s=%v\n", tblName, clmnName, fromTxt, fromColumn.Type, toTxt, toColumn.Type)
 			}
 			if fromColumn.Length != toColumn.Length {
-				fmt.Printf("テーブル名: %s 列名 %s のLengthが異なります。%s=%v , %s=%v", tblName, clmnName, fromTxt, fromColumn.Length, toTxt, toColumn.Length)
+				fmt.Printf("テーブル名: %s 列名 %s のLengthが異なります。%s=%v , %s=%v\n", tblName, clmnName, fromTxt, fromColumn.Length, toTxt, toColumn.Length)
 			}
 			if fromColumn.IsNull != toColumn.IsNull {
-				fmt.Printf("テーブル名: %s 列名 %s のIsNull定義が異なります。%s=%v , %s=%v", tblName, clmnName, fromTxt, fromColumn.IsNull, toTxt, toColumn.IsNull)
+				fmt.Printf("テーブル名: %s 列名 %s のIsNull定義が異なります。%s=%v , %s=%v\n", tblName, clmnName, fromTxt, fromColumn.IsNull, toTxt, toColumn.IsNull)
 			}
 		}
 	}
