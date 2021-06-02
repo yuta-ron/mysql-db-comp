@@ -31,45 +31,65 @@ func main() {
 		log.Fatal(err)
 	}
 
-	compare(fromInfo, toInfo, false)
-	compare(toInfo, fromInfo, true)
+	compare(fromInfo, toInfo)
+	// compare(toInfo, fromInfo, true)
 
 	defer fromDb.Close()
 	defer toDb.Close()
 }
 
-func compare(fromInfo *database.DBStruct, toInfo *database.DBStruct, reversed bool) {
+func compare(fromInfo *database.DBStruct, toInfo *database.DBStruct) {
 	fromTxt := "比較元"
 	toTxt := "比較先"
-	if reversed {
-		fromTxt = "比較先"
-		toTxt = "比較元"
+
+	allTableNames := make(map[string]string)
+	for k, _ := range fromInfo.Tables {
+		allTableNames[k] = k
+	}
+	for k, _ := range toInfo.Tables {
+		allTableNames[k] = k
 	}
 
-	for tblName, t := range fromInfo.Tables {
-		if _, ok := toInfo.Tables[tblName]; !ok {
+	for _, tblName := range allTableNames {
+		if _, ok := fromInfo.Tables[tblName]; !ok {
 			fmt.Printf("テーブル %s は%sのDBに存在しません\n", tblName, fromTxt)
 			continue
 		}
+		if _, ok := toInfo.Tables[tblName]; !ok {
+			fmt.Printf("テーブル %s は%sのDBに存在しません\n", tblName, toTxt)
+			continue
+		}
 
-		toClmn := *toInfo.Tables[tblName].Columns
+		allColumnNames := make(map[string]string)
+		for clmnName, _ := range *fromInfo.Tables[tblName].Columns {
+			allColumnNames[clmnName] = clmnName
+		}
+		for clmnName, _ := range *toInfo.Tables[tblName].Columns {
+			allColumnNames[clmnName] = clmnName
+		}
 
-		for clmnName, fromColumn := range *t.Columns {
-			if _, ok := toClmn[clmnName]; !ok {
-				fmt.Printf("テーブル名: %s 列名 %s は%sのDBに存在しません\n", tblName, clmnName, fromTxt)
+		for clmnName, _ := range allColumnNames {
+			fromClmns := *fromInfo.Tables[tblName].Columns
+			if _, ok := fromClmns[clmnName]; !ok {
+				fmt.Printf("テーブル %s の %s 列は %s のテーブルに存在しません\n", tblName, clmnName, fromTxt)
+				continue
+			}
+			toClmns := *toInfo.Tables[tblName].Columns
+			if _, ok := toClmns[clmnName]; !ok {
+				fmt.Printf("テーブル %s の %s 列は %s のテーブルに存在しません\n", tblName, clmnName, toTxt)
 				continue
 			}
 
-			toColumn := toClmn[clmnName]
+			fType := fromClmns[clmnName].Type
+			tType := toClmns[clmnName].Type
+			if fromClmns[clmnName].Type != toClmns[clmnName].Type {
+				fmt.Printf("テーブル %s の %s 列の型が異なります [比較元: %s <=> 比較先: %s]\n", tblName, clmnName, fType, tType)
+			}
 
-			if fromColumn.Type != toColumn.Type {
-				fmt.Printf("テーブル名: %s 列名 %s の型定義が異なります。%s=%v , %s=%v\n", tblName, clmnName, fromTxt, fromColumn.Type, toTxt, toColumn.Type)
-			}
-			if fromColumn.Length != toColumn.Length {
-				fmt.Printf("テーブル名: %s 列名 %s のLengthが異なります。%s=%v , %s=%v\n", tblName, clmnName, fromTxt, fromColumn.Length, toTxt, toColumn.Length)
-			}
-			if fromColumn.IsNull != toColumn.IsNull {
-				fmt.Printf("テーブル名: %s 列名 %s のIsNull定義が異なります。%s=%v , %s=%v\n", tblName, clmnName, fromTxt, fromColumn.IsNull, toTxt, toColumn.IsNull)
+			fNull := fromClmns[clmnName].IsNull
+			tNull := toClmns[clmnName].IsNull
+			if fromClmns[clmnName].IsNull != toClmns[clmnName].IsNull {
+				fmt.Printf("テーブル %s の %s 列のIsNull定義が異なります [比較元: %v <=> 比較先: %v]\n", tblName, clmnName, fNull, tNull)
 			}
 		}
 	}

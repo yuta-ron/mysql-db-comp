@@ -21,7 +21,6 @@ type DbAccessorInterface interface {
 
 type Column struct {
 	Type   string
-	Length int64
 	IsNull bool
 }
 
@@ -61,10 +60,8 @@ func (d *DbAccessor) Columns(tblName string) (*map[string]Column, error) {
 	types, _ := res.ColumnTypes()
 	for _, t := range types {
 		isNull, _ := t.Nullable()
-		length, _ := t.Length()
 		c := &Column{
 			Type:   t.DatabaseTypeName(),
-			Length: length,
 			IsNull: isNull,
 		}
 
