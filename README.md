@@ -6,7 +6,7 @@ DB間のテーブル、スキーマ情報の差分を検出するツール
 
 ```
 git clone git@github.com:yuta-ron/mysql-db-comp.git
-make linux-build
+make build-linux-amd64
 mv dbcmp <パスが通っているところ>
 ```
 ### Setup
