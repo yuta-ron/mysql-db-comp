@@ -38,6 +38,7 @@ func (d *DbAccessor) Tables() ([]string, error) {
 	if err != nil {
 		return tbls, err
 	}
+	defer res.Close()
 
 	var table string
 	for res.Next() {
@@ -53,6 +54,7 @@ func (d *DbAccessor) Columns(tblName string) (*map[string]Column, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Close()
 
 	cl, _ := res.Columns()
 	mCols := make(map[string]Column, len(cl))
